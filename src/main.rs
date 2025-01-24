@@ -53,6 +53,11 @@ impl CorsairVoidInfo {
 }
 
 fn main() {
+    #[cfg(not(target_os = "linux"))]
+    {
+        eprintln!("This tool only works on linux");
+        std::process::exit(1);
+    }
     let args = Args::parse();
     let info = CorsairVoidInfo::get_available_devices();
 

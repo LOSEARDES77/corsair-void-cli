@@ -1,5 +1,5 @@
 [package]
-name = "corsair-void"
+name = "corsair-void-cli"
 version = "0.1.0"
 edition = "2024"
 
