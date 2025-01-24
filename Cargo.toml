@@ -2,6 +2,9 @@
 name = "corsair-void-cli"
 version = "0.1.0"
 edition = "2024"
+authors = ["loseardes77"]
+description = "Cli app to manage Corsair Void headsets"
+keywords = ["corsair", "void", "corsair-void", "cli", "tool"]
 
 [dependencies]
 clap = { version = "4.5.27", features = ["derive"] }
