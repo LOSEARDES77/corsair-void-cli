@@ -132,9 +132,9 @@ fn main() {
             for device in &info.devices {
                 if let Some(battery_status) = &device.battery_status {
                     println!("Battery status: {}", battery_status.status());
-                }
-                if let Some(battery_level) = device.battery_status {
-                    println!("Battery level: {}%", battery_level.level());
+                    println!("Battery level: {}%", battery_status.level());
+                } else {
+                    println!("No battery found")
                 }
             }
         }

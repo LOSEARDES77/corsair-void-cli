@@ -73,45 +73,24 @@ impl Display for CorsairVoidDevice {
         writeln!(
             f,
             "\tHeadset firmware version: {}",
-            if self.fw_version_headset.is_some() {
-                self.fw_version_headset.clone().unwrap()
-            } else {
-                "Disconnected".to_string()
-            }
+            self.fw_version_headset.as_deref().unwrap_or("Disconnected")
         )?;
 
-        writeln!(
-            f,
-            "\tMicrophone is {}",
-            if self.microphone_up.is_some() {
-                if self.microphone_up.unwrap() {
-                    "up"
-                } else {
-                    "down"
-                }
-            } else {
-                "Disconnected"
-            }
-        )?;
+        writeln!(f, "\tMicrophone is {}", match self.microphone_up {
+            Some(true) => "up",
+            Some(false) => "down",
+            None => "Disconnected",
+        })?;
 
-        writeln!(
-            f,
-            "\tBattery {}",
-            if self.battery_status.is_some() {
-                self.battery_status.unwrap().status().to_string()
-            } else {
-                "Unknown".to_string()
-            }
-        )?;
+        let battery_status = self.battery_status.as_ref();
+        writeln!(f, "\tBattery {}", match battery_status {
+            Some(bs) => bs.status().to_string(),
+            None => "Unknown".to_string(),
+        })?;
 
-        writeln!(
-            f,
-            "\tBattery level: {}",
-            if self.battery_status.is_some() {
-                format!("{}%", self.battery_status.unwrap().level())
-            } else {
-                "Disconnected".to_string()
-            }
-        )
+        writeln!(f, "\tBattery level: {}", match battery_status {
+            Some(bs) => format!("{}%", bs.level()),
+            None => "Disconnected".to_string(),
+        })
     }
 }

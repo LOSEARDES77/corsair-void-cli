@@ -15,8 +15,8 @@ Assuming you have rust toolchain installed and cargo in PATH
 ## Subcommands
 
 - `info` Shows the device id, firmware versions, max sidetone value and microphone position.
-- `send-alert <alert>` Plays a built-in notification from the headset where `<alert>` is 0 or 1
-- `set-sidetone <sidetone>` Sets the sidetone value, where 0 < `<sidetone>` < max_sidetone.
+- `send-alert <alert>` Plays a built-in notification from the headset where `<alert>` is 0 or 1. Requires write privileges on `/sys/bus/hid/drivers/hid-corsair-void/<dev_id>/send_alert` file (Run with sudo).
+- `set-sidetone <sidetone>` Sets the sidetone value, where 0 < `<sidetone>` < max_sidetone. Requires write privileges on `/sys/bus/hid/drivers/hid-corsair-void/<dev_id>/set_sidetone` file (Run with sudo).
 - `battery` Prints out battery information (Not yet implemented).
 
 ---
