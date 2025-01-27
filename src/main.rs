@@ -1,6 +1,7 @@
+mod battery;
 mod device;
-
 use crate::device::CorsairVoidDevice;
+use battery::BatteryStatus;
 use clap::{Parser, Subcommand};
 use std::fs::{read_dir, write};
 use std::path::Path;
@@ -14,7 +15,10 @@ struct Args {
 #[derive(Subcommand)]
 enum Commands {
     #[command(about = "Prints out information about the headset")]
-    Info,
+    Info {
+        #[arg(short, help = "Output as json", default_value = "false")]
+        json: bool,
+    },
     #[command(about = "Play a built-in notification from the headset")]
     SendAlert {
         #[arg(index = 1, help = "0 or 1")]
@@ -26,7 +30,10 @@ enum Commands {
         sidetone: u8,
     },
     #[command(about = "Prints out information about the battery")]
-    Battery,
+    Battery {
+        #[arg(short, help = "Output as json", default_value = "false")]
+        json: bool,
+    },
 }
 struct CorsairVoidInfo {
     devices: Vec<CorsairVoidDevice>,
@@ -61,8 +68,17 @@ fn main() {
     let args = Args::parse();
     let info = CorsairVoidInfo::get_available_devices();
 
+    if info.devices.is_empty() {
+        println!("No Corsair Void devices found.");
+        return;
+    }
+
     match args.commands {
-        Commands::Info => {
+        Commands::Info { json } => {
+            if json {
+                println!("{}", serde_json::to_string_pretty(&info.devices).unwrap());
+                return;
+            }
             for device in &info.devices {
                 println!("{}", device);
             }
@@ -94,10 +110,7 @@ fn main() {
                     );
                     return;
                 }
-                let dev = format!(
-                    "/sys/bus/hid/drivers/hid-corsair-void/{}/send_alert",
-                    device.id
-                );
+                let dev = format!("/sys/bus/hid/drivers/hid-corsair-void/{}", device.id);
                 let sidetone_path = Path::new(&dev).join("set_sidetone");
                 if write(sidetone_path, sidetone.to_string()).is_ok() {
                     println!("Set sidetone to {} for device {}", sidetone, device.id);
@@ -106,8 +119,24 @@ fn main() {
                 }
             }
         }
-        Commands::Battery => {
-            todo!("Implement")
+        Commands::Battery { json } => {
+            if json {
+                let battery_info: Vec<BatteryStatus> = info
+                    .devices
+                    .iter()
+                    .filter_map(|device| device.battery_status)
+                    .collect();
+                println!("{}", serde_json::to_string_pretty(&battery_info).unwrap());
+                return;
+            }
+            for device in &info.devices {
+                if let Some(battery_status) = &device.battery_status {
+                    println!("Battery status: {}", battery_status.status());
+                }
+                if let Some(battery_level) = device.battery_status {
+                    println!("Battery level: {}%", battery_level.level());
+                }
+            }
         }
     }
 }
